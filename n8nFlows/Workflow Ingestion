@@ -1,0 +1,251 @@
+{
+  "name": "WF1-Ingestion",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://app.scrapingbee.com/api/v1/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": ""
+            },
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "name": "render_js",
+              "value": "true"
+            },
+            {
+              "name": "block_resources",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "583f7364-5d27-4b81-80c6-7e84342edbc9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sources = [\n\n  { url: 'https://www.amsterdam.nl/burgerzaken/paspoort-en-idkaart/paspoort-aanvragen/',\n    category: 'passport-id', docName: 'Passport Application Guide' },\n\n  { url: 'https://www.amsterdam.nl/parkeren-verkeer/parkeervergunning/parkeervergunning-bewoners',\n    category: 'parking', docName: 'Resident Parking Permit Guide' },\n\n  { url: 'https://www.amsterdam.nl/stadspas/stadspas-aanvragen/',\n    category: 'benefits-support', docName: 'Stadspas Application Guide' },\n{ url: 'https://www.amsterdam.nl/subsidies/subsidieregelingen/subsidie-duurzame-amsterdamse-energie/',\n    category: 'sustainable-amsterdam-energy', docName: 'sustainable-amsterdam-energy' },\n{ url: 'https://www.amsterdam.nl/werk-en-inkomen/bijstandsuitkering/bijstandsuitkering-aanvragen/',\n    category: 'apply for assistance', docName: 'apply for assistance' },\n\n{ url: 'https://www.amsterdam.nl/burgerzaken/verhuizen-inschrijving-briefadres/inschrijven-rni/',\n    category: 'Non-Resident Registration', docName: 'Non-Resident Registration' },\n\n{ url: 'https://www.amsterdam.nl/burgerzaken/verhuizen-inschrijving-briefadres/verhuizen-amsterdam-vanuit-buitenland/',\n    category: 'Moving to Amsterdam from abroad', docName: 'Moving to Amsterdam from abroad' },\n\n{ url: 'https://www.amsterdam.nl/zorg-ondersteuning/ondersteuning/inburgeren/',\n    category: 'Civic integration', docName: 'Civic integration' },\n\n{ url: 'https://www.amsterdam.nl/afval/grof-afval-wegbrengen-of-laten-ophalen/',\n    category: 'Drop off bulky waste', docName: 'Drop off bulky waste' },\n  { url: 'https://www.amsterdam.nl/afval-hergebruik/groente-fruit-etensresten-tuinafval/nieuwe-pas-gfet-container/',\n    category: 'waste-recycling', docName: 'GFT Waste Card Guide' }\n\n];\n\nreturn sources.map(s => ({ json: s }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -32
+      ],
+      "id": "1ae90783-d575-4ae8-af31-f1e30c7e59f9",
+      "name": "URL Sources"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Alternative: use a Code node instead of HTML Extract\n// More robust — handles missing selectors gracefully\n\nconst html = $input.first().json.data; // raw HTML from HTTP Request\nconst url  = $input.first().json.url;\nconst cat  = $input.first().json.category;\nconst doc  = $input.first().json.docName;\n\n// Strip all HTML tags, normalise whitespace\nconst text = html\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, '')\n  .replace(/<nav[\\s\\S]*?<\\/nav>/gi, '')\n  .replace(/<header[\\s\\S]*?<\\/header>/gi, '')\n  .replace(/<footer[\\s\\S]*?<\\/footer>/gi, '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nreturn [{ json: { content: text, sourceUrl: url, category: cat, docName: doc } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -16
+      ],
+      "id": "1197e510-f0d2-4032-af6f-5c83663d9877",
+      "name": "HTML Extract"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "amsterdam-municipality-kb",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        1072,
+        -16
+      ],
+      "id": "f8e7df37-a175-4ac8-a8b0-56c2ee49f4e5",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "vV1YkbDrm0hTVwnU",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        192
+      ],
+      "id": "2a6b1363-00cf-4ffb-8525-6796f4639be6",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "7XgIXXhf8NzH2gfU",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst content = input.content || '';\nconst size = 800;\nconst overlap = 150;\nconst chunks = [];\n\nfor (let i = 0; i < content.length; i += size - overlap) {\n  chunks.push({\n    json: {\n      text: content.slice(i, i + size),\n      metadata: {\n        sourceUrl: input.sourceUrl,\n        category: input.category,\n        docName: input.docName,\n        chunkIndex: chunks.length\n      }\n    }\n  });\n}\n\nreturn chunks.length > 0 ? chunks : [{ json: {\n  text: content,\n  metadata: {\n    sourceUrl: input.sourceUrl,\n    category: input.category,\n    docName: input.docName,\n    chunkIndex: 0\n  }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -16
+      ],
+      "id": "e51b4286-58c7-490a-bba2-01a0f41b3a02",
+      "name": "Text Chunker"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        160
+      ],
+      "id": "bfc381dc-d397-4514-b6d9-0749fb885ce2",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -32
+      ],
+      "id": "8a947f9a-6d0e-4297-9350-5ab63fae1e49",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL Sources": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Extract": {
+      "main": [
+        [
+          {
+            "node": "Text Chunker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Chunker": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "URL Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1896b86a-8edd-4869-ab24-5d7c8c92f227",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cb2bfc0854d559d9847d5801a94cedebba89a9980e5ec3181cc6ac99a4dda3ad"
+  },
+  "nodeGroups": [],
+  "id": "yVcOleskUlgYdOcJ",
+  "tags": []
+}
