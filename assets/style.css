@@ -1,0 +1,222 @@
+/* ============================================================================
+   AmsBot — Amsterdam Municipality Chatbot
+   Palette: Red #CC1414 | Off-white #F5F2EC | Text #1A1A1A | Blue #1B6CA8
+   NOTE: No :has() selectors — those break in many Streamlit/browser combos.
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+html, body, [class*="css"] {
+    font-family: Inter, system-ui, -apple-system, sans-serif !important;
+}
+
+.stApp {
+    background-color: #F5F2EC;
+}
+
+/* Ensure all text stays dark unless explicitly overridden */
+p, span, div, li, td, th, label {
+    color: #1A1A1A;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.ams-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0 12px 0;
+}
+
+.ams-crosses {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #CC1414;
+    letter-spacing: 4px;
+    line-height: 1;
+}
+
+.ams-header-text { flex: 1; }
+
+.ams-title {
+    font-size: 1.9rem !important;
+    font-weight: 700 !important;
+    color: #CC1414 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+}
+
+.ams-subtitle {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 2px 0 0 0;
+}
+
+.ams-badge {
+    background: #CC1414;
+    color: #fff !important;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.ams-divider {
+    border: none;
+    border-top: 2px solid #CC1414;
+    margin: 4px 0 16px 0;
+}
+
+/* ── Chat message cards ───────────────────────────────────────────────────── */
+
+/* All chat message containers */
+[data-testid="stChatMessage"] {
+    border-radius: 12px;
+    padding: 4px 0;
+}
+
+/* Assistant card: white with red left border */
+[data-testid="stChatMessage"][data-testid="stChatMessage"] {
+    background: transparent;
+}
+
+/* Target the inner content area of every assistant message */
+.stChatMessage [data-testid="stChatMessageContent"] {
+    background-color: #ffffff;
+    border-left: 4px solid #CC1414;
+    border-radius: 4px 12px 12px 12px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    color: #1A1A1A !important;
+}
+
+/* Force text colour dark inside all chat bubbles */
+.stChatMessage [data-testid="stChatMessageContent"] p,
+.stChatMessage [data-testid="stChatMessageContent"] span,
+.stChatMessage [data-testid="stChatMessageContent"] div,
+.stChatMessage [data-testid="stChatMessageContent"] li {
+    color: #1A1A1A !important;
+}
+
+/* Caption (timestamp) */
+.stChatMessage [data-testid="stCaptionContainer"] p {
+    color: #999 !important;
+    font-size: 0.72rem !important;
+}
+
+/* ── Citation badges ──────────────────────────────────────────────────────── */
+.citation-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #e8e4dc;
+}
+
+.citation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #EBF3FA;
+    color: #1B6CA8 !important;
+    border: 1px solid #b8d4eb;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: background-color 0.15s;
+}
+
+.citation-badge:hover {
+    background-color: #d0e8f5;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    background-color: #fdfbf7 !important;
+    border-right: 1px solid #e8e4dc;
+}
+
+.sidebar-section-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #CC1414 !important;
+    margin-bottom: 8px;
+}
+
+section[data-testid="stSidebar"] .stButton > button {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    color: #1A1A1A !important;
+    font-size: 0.82rem;
+    text-align: left;
+    padding: 8px 10px;
+    white-space: normal;
+    height: auto;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+    border-color: #CC1414;
+    background: #fff5f5;
+    color: #CC1414 !important;
+}
+
+.category-item {
+    padding: 5px 4px;
+    font-size: 0.85rem;
+    color: #444 !important;
+    border-bottom: 1px solid #ede9e0;
+}
+
+.category-item:last-child { border-bottom: none; }
+
+.sidebar-lang-note {
+    font-size: 0.8rem;
+    color: #666 !important;
+    line-height: 1.5;
+}
+
+.sidebar-footer {
+    font-size: 0.82rem;
+    color: #555 !important;
+    line-height: 1.8;
+}
+
+.sidebar-footer a { color: #1B6CA8 !important; text-decoration: none; }
+.sidebar-footer a:hover { text-decoration: underline; }
+.footer-hours { font-size: 0.75rem; color: #888 !important; }
+.footer-brand { font-weight: 600; color: #CC1414 !important; margin-top: 8px; }
+
+/* ── Chat input ───────────────────────────────────────────────────────────── */
+[data-testid="stChatInput"] textarea {
+    border: 1.5px solid #ccc !important;
+    border-radius: 12px !important;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 0.95rem;
+    background: #ffffff !important;
+    color: #1A1A1A !important;
+}
+
+[data-testid="stChatInput"] textarea:focus {
+    border-color: #CC1414 !important;
+    box-shadow: 0 0 0 2px rgba(204, 20, 20, 0.12) !important;
+}
+
+[data-testid="stChatInput"] button {
+    background-color: #CC1414 !important;
+    border-radius: 8px !important;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #CC1414; }
